@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 MBTI 성격 유형 검사</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        /* 커스텀 애니메이션 */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+        /* 커스텀 슬라이더 스타일 */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            margin-top: -9px;
+            transition: transform 0.2s;
+        }
+        input[type=range]:hover::-webkit-slider-thumb {
+            transform: scale(1.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-10 transition-all duration-500">
+
+        <!-- 시작 화면 -->
+        <div id="start-screen" class="text-center fade-in">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">상세 MBTI 성격 유형 검사</h1>
+            <p class="text-gray-600 mb-6 text-lg">각 문항을 읽고 자신의 생각이나 행동에 더 가까운 쪽으로<br>슬라이더를 조절하여 답변해주세요.</p>
+            <div class="flex justify-center mb-8">
+                
+            </div>
+            <p class="text-sm text-gray-500 mb-8">※ 본 검사는 간이 검사이며, 정식 검사와는 차이가 있을 수 있습니다.</p>
+            <button id="start-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                검사 시작하기
+            </button>
+        </div>
+
+        <!-- 질문 화면 -->
+        <div id="question-screen" class="hidden">
+            <!-- 진행률 바 -->
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full progress-bar-fill" style="width: 0%"></div>
+            </div>
+            <p id="question-number" class="text-right text-sm text-gray-500 mb-6"></p>
+            
+            <div id="question-container" class="text-center fade-in">
+                <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-10 h-24 flex items-center justify-center"></h2>
+                
+                <div class="flex justify-between items-center text-lg font-bold mb-4">
+                    <span id="choice-a" class="text-indigo-600 w-2/5 text-right"></span>
+                    <span class="text-gray-400 mx-2 text-sm">중립</span>
+                    <span id="choice-b" class="text-teal-600 w-2/5 text-left"></span>
+                </div>
+
+                <input type="range" id="answer-slider" min="-3" max="3" value="0" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                
+                <div class="flex justify-between text-xs text-gray-500 px-1 mt-2">
+                    <span>매우 그렇다</span>
+                    <span>그렇다</span>
+                    <span>조금 그렇다</span>
+                    <span>보통</span>
+                    <span>조금 그렇다</span>
+                    <span>그렇다</span>
+                    <span>매우 그렇다</span>
+                </div>
+
+                <button id="next-btn" class="mt-12 w-full sm:w-1/2 mx-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full text-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
+                    다음
+                </button>
+            </div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="result-screen" class="hidden fade-in text-center">
+            <p class="text-indigo-600 font-semibold mb-2">당신의 성격 유형은...</p>
+            <h1 id="mbti-type" class="text-6xl font-extrabold text-indigo-600 mb-2"></h1>
+            <p id="mbti-title" class="text-2xl font-bold text-gray-800 mb-8"></p>
+
+            <div class="text-left space-y-6 mb-10">
+                <div class="result-bar-container"></div>
+                <div class="result-bar-container"></div>
+                <div class="result-bar-container"></div>
+                <div class="result-bar-container"></div>
+            </div>
+
+            <div class="text-left bg-gray-50 p-6 rounded-lg">
+                <h3 class="font-bold text-lg text-gray-800 mb-3">유형 설명</h3>
+                <p id="mbti-description" class="text-gray-600 leading-relaxed"></p>
+            </div>
+             <div class="text-left bg-gray-50 p-6 rounded-lg mt-4">
+                <h3 class="font-bold text-lg text-gray-800 mb-3">강점 및 약점</h3>
+                <p id="mbti-strengths" class="text-gray-600 leading-relaxed"></p>
+            </div>
+
+            <button id="restart-btn" class="mt-10 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                다시 검사하기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const progressBar = document.getElementById('progress-bar');
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const choiceAEl = document.getElementById('choice-a');
+        const choiceBEl = document.getElementById('choice-b');
+        const answerSlider = document.getElementById('answer-slider');
+
+        const mbtiTypeEl = document.getElementById('mbti-type');
+        const mbtiTitleEl = document.getElementById('mbti-title');
+        const mbtiDescriptionEl = document.getElementById('mbti-description');
+        const mbtiStrengthsEl = document.getElementById('mbti-strengths');
+        const resultBarContainers = document.querySelectorAll('.result-bar-container');
+
+        // Questions Data
+        const questions = [
+            { text: "혼자 시간을 보내며 재충전한다기보다 다른 사람들과 어울리며 에너지를 얻는 편이다.", type: "EI", direction: 1 },
+            { text: "새로운 사람들을 만나는 사교 모임에 가는 것을 즐긴다.", type: "EI", direction: 1 },
+            { text: "주목받는 것을 좋아하고, 대화의 중심에 있는 경우가 많다.", type: "EI", direction: 1 },
+            { text: "행동하기 전에 깊게 생각하기보다, 먼저 행동하고 보는 경향이 있다.", type: "EI", direction: 1 },
+            { text: "조용하고 프라이빗한 활동보다는 활기차고 공개적인 활동을 선호한다.", type: "EI", direction: 1 },
+
+            { text: "미래의 가능성을 상상하는 것보다 현재의 구체적인 사실에 더 집중한다.", type: "SN", direction: -1 },
+            { text: "경험을 통해 배우는 것을 선호하며, 실용적인 정보를 더 신뢰한다.", type: "SN", direction: -1 },
+            { text: "이야기를 할 때 비유나 상징보다는 사실을 순서대로 말하는 편이다.", type: "SN", direction: -1 },
+            { text: "새로운 이론이나 추상적인 개념보다는 검증된 방법에 더 관심이 많다.", type: "SN", direction: -1 },
+            { text: "숲보다는 나무를 보는 경향이 있으며, 세부사항을 잘 기억한다.", type: "SN", direction: -1 },
+
+            { text: "결정을 내릴 때 객관적인 사실과 논리를 개인적인 감정보다 우선시한다.", type: "TF", direction: -1 },
+            { text: "다른 사람의 감정에 공감하기보다는 문제에 대한 해결책을 찾는 데 더 집중한다.", type: "TF", direction: -1 },
+            { text: "때로는 진실을 말하는 것이 상대방의 기분을 배려하는 것보다 더 중요하다고 생각한다.", type: "TF", direction: -1 },
+            { text: "효율성과 합리성을 중요하게 생각하며, 감정적인 논쟁을 피하는 편이다.", type: "TF", direction: -1 },
+            { text: "비판을 할 때 직설적이라는 말을 듣기도 하지만, 그것이 더 도움이 된다고 믿는다.", type: "TF", direction: -1 },
+            
+            { text: "여행을 갈 때 상세한 계획을 세우기보다는 즉흥적으로 결정하는 것을 즐긴다.", type: "JP", direction: 1 },
+            { text: "마감 기한이 임박했을 때 오히려 집중력이 높아지고 효율이 오른다.", type: "JP", direction: 1 },
+            { text: "규칙이나 정해진 절차에 얽매이는 것을 답답하게 느낀다.", type: "JP", direction: 1 },
+            { text: "여러 가지 일을 동시에 시작하고, 상황에 따라 유연하게 계획을 변경한다.", type: "JP", direction: 1 },
+            { text: "결정을 내리기 전에 모든 가능성을 열어두는 것을 선호한다.", type: "JP", direction: 1 }
+        ];
+        
+        // Result Data
+        const results = {
+            ISTJ: { title: "청렴결백한 논리주의자", description: "현실 감각이 뛰어나고 책임감이 강하며, 한번 시작한 일은 끝까지 해내는 성실한 유형입니다. 규칙을 중시하고 약속을 잘 지키며, 조직에서 안정적인 역할을 수행합니다.", strengths: "강점: 책임감, 성실함, 논리성\n약점: 융통성 부족, 변화에 대한 두려움, 타인 감정 파악의 어려움" },
+            ISFJ: { title: "용감한 수호자", description: "차분하고 헌신적이며, 주변 사람들을 돕는 것에서 행복을 느낍니다. 타인의 감정을 잘 살피고, 인내심이 강하며 성실하여 안정적인 관계를 중요시합니다.", strengths: "강점: 헌신적, 공감 능력, 책임감\n약점: 거절의 어려움, 과도한 자기희생, 변화에 대한 저항" },
+            INFJ: { title: "선의의 옹호자", description: "통찰력이 높고 영감이 뛰어나며, 사람들에게 긍정적인 영향을 주는 것을 중요하게 생각합니다. 이상주의적인 성향이 강하며, 깊고 의미 있는 관계를 추구합니다.", strengths: "강점: 통찰력, 창의성, 공감 능력\n약점: 지나친 이상주의, 번아웃에 취약, 비판에 민감함" },
+            INTJ: { title: "용의주도한 전략가", description: "상상력이 풍부하며 철두철미한 계획을 세우는 전략가입니다. 지식을 중요하게 생각하고, 독립적이며 논리적 사고를 통해 복잡한 문제를 해결하는 데 능숙합니다.", strengths: "강점: 전략적 사고, 독립성, 자신감\n약점: 오만함, 사회적 관계의 어려움, 지나친 완벽주의" },
+            ISTP: { title: "만능 재주꾼", description: "논리적이고 실용적이며, 도구와 기계를 다루는 데 뛰어난 재능을 보입니다. 위기 상황에 대처하는 능력이 뛰어나고, 새로운 경험과 스릴을 즐깁니다.", strengths: "강점: 위기 대처 능력, 실용성, 논리적 분석\n약점: 장기 계획 부족, 충동성, 감정 표현의 어려움" },
+            ISFP: { title: "호기심 많은 예술가", description: "온화하고 겸손하며, 삶의 여유를 즐길 줄 아는 예술가 유형입니다. 현재를 즐기며, 다른 사람의 감정에 민감하고 미적 감각이 뛰어납니다.", strengths: "강점: 예술적 감각, 개방성, 겸손함\n약점: 갈등 회피, 비판에 대한 민감성, 계획성 부족" },
+            INFP: { title: "열정적인 중재자", description: "상냥하고 이타적이며, 이상적인 세계를 꿈꾸는 낭만가입니다. 자신의 가치관을 중요하게 생각하며, 다른 사람의 가능성을 믿고 지지해주는 따뜻한 마음을 가졌습니다.", strengths: "강점: 공감 능력, 창의성, 이상주의\n약점: 지나치게 감정적, 비현실적, 갈등 회피" },
+            INTP: { title: "논리적인 사색가", description: "끊임없이 새로운 지식에 목말라 하는 혁신가 유형입니다. 논리적이고 분석적이며, 복잡한 문제를 해결하는 것을 즐기지만, 때로는 사회적 관습에 무관심할 수 있습니다.", strengths: "강점: 분석력, 독창성, 지적 호기심\n약점: 사회성 부족, 지나친 이론화, 감정적 둔감함" },
+            ESTP: { title: "모험을 즐기는 사업가", description: "넘치는 에너지와 재치로 주변 사람들을 즐겁게 만드는 유형입니다. 현실적인 문제 해결에 능하며, 스릴과 모험을 즐기고 주목받는 것을 좋아합니다.", strengths: "강점: 사교성, 현실 감각, 위기 대처 능력\n약점: 충동성, 장기 계획 부족, 무모함" },
+            ESFP: { title: "자유로운 영혼의 연예인", description: "사교적이고 즉흥적이며, 사람들의 주목을 받는 것을 즐깁니다. 현재의 즐거움을 중요하게 생각하며, 뛰어난 공감 능력으로 분위기 메이커 역할을 합니다.", strengths: "강점: 사교성, 긍정적 에너지, 현실적\n약점: 계획성 부족, 충동 구매, 갈등 회피" },
+            ENFP: { title: "재기발랄한 활동가", description: "상상력이 풍부하고 열정적이며, 사람들과 어울리는 것을 좋아하는 유형입니다. 긍정적이고 창의적이며, 새로운 도전을 즐기고 가능성을 탐색하는 것을 좋아합니다.", strengths: "강점: 창의성, 열정, 사교성\n약점: 집중력 부족, 과도한 감정 기복, 일의 마무리가 어려움" },
+            ENTP: { title: "뜨거운 논쟁을 즐기는 변론가", description: "지적인 도전을 두려워하지 않는 똑똑한 유형입니다. 새로운 아이디어를 내는 것을 즐기며, 논리적인 토론을 통해 자신의 지식을 확장하는 것을 좋아합니다.", strengths: "강점: 지적 호기심, 창의성, 논리적 토론 능력\n약점: 인내심 부족, 반항적 성향, 타인 감정 고려 미흡" },
+            ESTJ: { title: "엄격한 관리자", description: "현실적이고 추진력이 강하며, 조직을 관리하는 데 뛰어난 능력을 보입니다. 규칙을 중시하고, 책임감이 강하여 리더 역할을 잘 수행하며, 목표 달성을 중요시합니다.", strengths: "강점: 리더십, 조직력, 책임감\n약점: 융통성 부족, 감정 표현의 어려움, 완고함" },
+            ESFJ: { title: "사교적인 외교관", description: "타인에게 관심이 많고 사교적이며, 주변 사람들을 챙기는 것을 좋아합니다. 동정심이 많고, 조화로운 관계를 중요하게 생각하여 집단의 화합을 이끌어냅니다.", strengths: "강점: 사교성, 공감 능력, 책임감\n약점: 비판에 민감, 타인의 시선에 대한 과도한 의식, 거절의 어려움" },
+            ENFJ: { title: "정의로운 사회운동가", description: "넘치는 카리스마와 열정으로 사람들을 이끄는 리더 유형입니다. 타인의 성장을 돕는 것에서 보람을 느끼며, 자신의 이상을 실현하기 위해 적극적으로 행동합니다.", strengths: "강점: 리더십, 이타심, 공감 능력\n약점: 지나친 이상주의, 타인 문제에 대한 과몰입, 비판에 대한 민감성" },
+            ENTJ: { title: "대담한 통솔자", description: "타고난 리더십과 자신감으로 목표를 향해 나아가는 유형입니다. 도전을 즐기며, 장기적인 계획을 세우고 실행하는 능력이 뛰어나고, 비효율적인 것을 참지 못합니다.", strengths: "강점: 리더십, 결단력, 전략적 사고\n약점: 성급함, 오만함, 타인 감정에 대한 둔감함" }
+        };
+
+        const typeMap = {
+            EI: { a: '외향(E)', b: '내향(I)' },
+            SN: { a: '직관(N)', b: '감각(S)' },
+            TF: { a: '감정(F)', b: '사고(T)' },
+            JP: { a: '인식(P)', b: '판단(J)' }
+        };
+
+        let currentQuestionIndex = 0;
+        let answers = [];
+
+        function startTest() {
+            currentQuestionIndex = 0;
+            answers = [];
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            const progress = (currentQuestionIndex / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            questionNumberEl.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+            questionTextEl.textContent = question.text;
+
+            const choices = typeMap[question.type];
+            // direction 1 means statement favors A, -1 means it favors B
+            choiceAEl.textContent = question.direction === 1 ? choices.a : choices.b;
+            choiceBEl.textContent = question.direction === 1 ? choices.b : choices.a;
+            
+            answerSlider.value = 0;
+            nextBtn.disabled = false; // 항상 다음 버튼 활성화
+        }
+
+        function handleNext() {
+            const value = parseInt(answerSlider.value);
+            const question = questions[currentQuestionIndex];
+            answers.push({ type: question.type, value: value * question.direction });
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                const questionContainer = document.getElementById('question-container');
+                questionContainer.classList.remove('fade-in');
+                void questionContainer.offsetWidth; // Force reflow
+                questionContainer.classList.add('fade-in');
+                showQuestion();
+            } else {
+                calculateResult();
+            }
+        }
+
+        function calculateResult() {
+            let scores = { EI: 0, SN: 0, TF: 0, JP: 0 };
+            const maxScorePerType = 3 * 5; // 5 questions per type, max slider value is 3
+
+            answers.forEach(answer => {
+                scores[answer.type] += answer.value;
+            });
+            
+            const EI_percent = Math.round(50 + (scores.EI / maxScorePerType) * 50);
+            const SN_percent = Math.round(50 + (scores.SN / maxScorePerType) * 50);
+            const TF_percent = Math.round(50 + (scores.TF / maxScorePerType) * 50);
+            const JP_percent = Math.round(50 + (scores.JP / maxScorePerType) * 50);
+
+            const finalType = 
+                (EI_percent >= 50 ? 'E' : 'I') +
+                (SN_percent >= 50 ? 'N' : 'S') +
+                (TF_percent >= 50 ? 'F' : 'T') +
+                (JP_percent >= 50 ? 'P' : 'J');
+                
+            showResult(finalType, [EI_percent, SN_percent, TF_percent, JP_percent]);
+        }
+        
+        function showResult(type, percentages) {
+            const resultData = results[type];
+            mbtiTypeEl.textContent = type;
+            mbtiTitleEl.textContent = resultData.title;
+            mbtiDescriptionEl.textContent = resultData.description;
+            mbtiStrengthsEl.innerText = resultData.strengths;
+
+            const percentageData = [
+                { labels: typeMap.EI, percent: percentages[0] },
+                { labels: typeMap.SN, percent: percentages[1] },
+                { labels: typeMap.TF, percent: percentages[2] },
+                { labels: typeMap.JP, percent: percentages[3] }
+            ];
+
+            const barContainer = document.querySelector('.result-bar-container').parentNode;
+            barContainer.innerHTML = ''; // Clear previous bars
+
+            percentageData.forEach(data => {
+                const a_percent = data.percent;
+                const b_percent = 100 - a_percent;
+
+                const barHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between font-bold text-gray-700">
+                            <span>${data.labels.a}</span>
+                            <span>${data.labels.b}</span>
+                        </div>
+                        <div class="w-full flex h-8 rounded-full overflow-hidden bg-gray-200">
+                            <div class="flex items-center justify-center bg-indigo-500 text-white font-bold" style="width: ${a_percent}%">${a_percent}%</div>
+                            <div class="flex items-center justify-center bg-teal-500 text-white font-bold" style="width: ${b_percent}%">${b_percent}%</div>
+                        </div>
+                    </div>
+                `;
+                barContainer.innerHTML += barHTML;
+            });
+
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startTest);
+        nextBtn.addEventListener('click', handleNext);
+        restartBtn.addEventListener('click', startTest);
+
+    </script>
+</body>
+</html>
