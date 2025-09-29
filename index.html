@@ -58,7 +58,9 @@
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">상세 MBTI 성격 유형 검사</h1>
             <p class="text-gray-600 mb-6 text-lg">각 문항을 읽고 자신의 생각이나 행동에 더 가까운 쪽으로<br>슬라이더를 조절하여 답변해주세요.</p>
             <div class="flex justify-center mb-8">
-                
+                <svg class="w-32 h-32 text-indigo-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 22.5l-.648-1.938a3.375 3.375 0 00-2.684-2.684L11.25 18l1.938-.648a3.375 3.375 0 002.684-2.684L16.25 13.5l.648 1.938a3.375 3.375 0 002.684 2.684L21.75 18l-1.938.648a3.375 3.375 0 00-2.684 2.684z"></path>
+                </svg>
             </div>
             <p class="text-sm text-gray-500 mb-8">※ 본 검사는 간이 검사이며, 정식 검사와는 차이가 있을 수 있습니다.</p>
             <button id="start-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
@@ -77,10 +79,10 @@
             <div id="question-container" class="text-center fade-in">
                 <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-10 h-24 flex items-center justify-center"></h2>
                 
-                <div class="flex justify-between items-center text-lg font-bold mb-4">
-                    <span id="choice-a" class="text-indigo-600 w-2/5 text-right"></span>
+                <div class="flex justify-between items-center text-md sm:text-lg font-bold mb-4">
+                    <span id="choice-a" class="text-indigo-600 w-2/5 text-right leading-snug"></span>
                     <span class="text-gray-400 mx-2 text-sm">중립</span>
-                    <span id="choice-b" class="text-teal-600 w-2/5 text-left"></span>
+                    <span id="choice-b" class="text-teal-600 w-2/5 text-left leading-snug"></span>
                 </div>
 
                 <input type="range" id="answer-slider" min="-3" max="3" value="0" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
@@ -95,7 +97,7 @@
                     <span>매우 그렇다</span>
                 </div>
 
-                <button id="next-btn" class="mt-12 w-full sm:w-1/2 mx-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full text-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
+                <button id="next-btn" class="mt-12 w-full sm:w-1/2 mx-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full text-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
                     다음
                 </button>
             </div>
@@ -107,11 +109,8 @@
             <h1 id="mbti-type" class="text-6xl font-extrabold text-indigo-600 mb-2"></h1>
             <p id="mbti-title" class="text-2xl font-bold text-gray-800 mb-8"></p>
 
-            <div class="text-left space-y-6 mb-10">
-                <div class="result-bar-container"></div>
-                <div class="result-bar-container"></div>
-                <div class="result-bar-container"></div>
-                <div class="result-bar-container"></div>
+            <div id="result-bars" class="text-left space-y-6 mb-10">
+                <!-- 결과 바가 동적으로 생성됩니다 -->
             </div>
 
             <div class="text-left bg-gray-50 p-6 rounded-lg">
@@ -149,33 +148,37 @@
         const mbtiTitleEl = document.getElementById('mbti-title');
         const mbtiDescriptionEl = document.getElementById('mbti-description');
         const mbtiStrengthsEl = document.getElementById('mbti-strengths');
-        const resultBarContainers = document.querySelectorAll('.result-bar-container');
+        const resultBarsEl = document.getElementById('result-bars');
 
         // Questions Data
         const questions = [
-            { text: "혼자 시간을 보내며 재충전한다기보다 다른 사람들과 어울리며 에너지를 얻는 편이다.", type: "EI", direction: 1 },
-            { text: "새로운 사람들을 만나는 사교 모임에 가는 것을 즐긴다.", type: "EI", direction: 1 },
-            { text: "주목받는 것을 좋아하고, 대화의 중심에 있는 경우가 많다.", type: "EI", direction: 1 },
-            { text: "행동하기 전에 깊게 생각하기보다, 먼저 행동하고 보는 경향이 있다.", type: "EI", direction: 1 },
-            { text: "조용하고 프라이빗한 활동보다는 활기차고 공개적인 활동을 선호한다.", type: "EI", direction: 1 },
+            // EI: choiceA = I, choiceB = E
+            { type: "EI", choiceA: "소수의 사람들과 깊이 있는 대화를 선호한다", choiceB: "다양한 사람들과 넓은 관계를 맺는 것을 즐긴다" },
+            { type: "EI", choiceA: "주말에는 주로 집에서 조용히 휴식을 취한다", choiceB: "주말에는 약속을 잡고 사람들을 만나러 나간다" },
+            { type: "EI", choiceA: "글로 생각을 표현하는 것이 더 편안하다", choiceB: "말로 직접 생각을 표현하는 것이 더 편안하다" },
+            { type: "EI", choiceA: "활동에 참여할 때, 주로 관찰하는 역할을 한다", choiceB: "활동에 참여할 때, 주도적으로 이끄는 역할을 한다" },
+            { type: "EI", choiceA: "에너지를 안으로 쓰며 생각을 정리한다", choiceB: "에너지를 밖으로 표현하며 생각을 정리한다" },
 
-            { text: "미래의 가능성을 상상하는 것보다 현재의 구체적인 사실에 더 집중한다.", type: "SN", direction: -1 },
-            { text: "경험을 통해 배우는 것을 선호하며, 실용적인 정보를 더 신뢰한다.", type: "SN", direction: -1 },
-            { text: "이야기를 할 때 비유나 상징보다는 사실을 순서대로 말하는 편이다.", type: "SN", direction: -1 },
-            { text: "새로운 이론이나 추상적인 개념보다는 검증된 방법에 더 관심이 많다.", type: "SN", direction: -1 },
-            { text: "숲보다는 나무를 보는 경향이 있으며, 세부사항을 잘 기억한다.", type: "SN", direction: -1 },
+            // SN: choiceA = S, choiceB = N
+            { type: "SN", choiceA: "과거의 경험과 현재의 사실을 더 신뢰한다", choiceB: "미래의 가능성과 숨겨진 의미를 더 중요하게 생각한다" },
+            { type: "SN", choiceA: "나무를 보듯, 사물의 구체적인 부분을 먼저 본다", choiceB: "숲을 보듯, 사물의 전체적인 그림을 먼저 본다" },
+            { type: "SN", choiceA: "실용적이고 현실적인 해결책을 선호한다", choiceB: "창의적이고 독창적인 아이디어를 선호한다" },
+            { type: "SN", choiceA: "설명서를 순서대로 따르는 것이 편하다", choiceB: "설명서보다는 직관에 따라 행동하는 것이 편하다" },
+            { type: "SN", choiceA: "익숙하고 검증된 방식으로 일하는 것을 좋아한다", choiceB: "새롭고 혁신적인 방식으로 일하는 것을 좋아한다" },
 
-            { text: "결정을 내릴 때 객관적인 사실과 논리를 개인적인 감정보다 우선시한다.", type: "TF", direction: -1 },
-            { text: "다른 사람의 감정에 공감하기보다는 문제에 대한 해결책을 찾는 데 더 집중한다.", type: "TF", direction: -1 },
-            { text: "때로는 진실을 말하는 것이 상대방의 기분을 배려하는 것보다 더 중요하다고 생각한다.", type: "TF", direction: -1 },
-            { text: "효율성과 합리성을 중요하게 생각하며, 감정적인 논쟁을 피하는 편이다.", type: "TF", direction: -1 },
-            { text: "비판을 할 때 직설적이라는 말을 듣기도 하지만, 그것이 더 도움이 된다고 믿는다.", type: "TF", direction: -1 },
+            // TF: choiceA = T, choiceB = F
+            { type: "TF", choiceA: "결정할 때, 무엇이 논리적이고 공정한지 먼저 생각한다", choiceB: "결정할 때, 다른 사람에게 어떤 영향을 미칠지 먼저 생각한다" },
+            { type: "TF", choiceA: "진실과 사실을 전달하는 것이 가장 중요하다고 믿는다", choiceB: "사람들 간의 조화와 관계를 유지하는 것이 중요하다고 믿는다" },
+            { type: "TF", choiceA: "비판적인 분석을 통해 문제를 해결하려고 한다", choiceB: "따뜻한 공감과 위로를 통해 사람들을 도우려고 한다" },
+            { type: "TF", choiceA: "원칙과 기준을 중요하게 생각한다", choiceB: "상황과 감정을 중요하게 생각한다" },
+            { type: "TF", choiceA: "객관적인 입장을 유지하는 것이 편하다", choiceB: "주관적인 감정에 귀 기울이는 것이 편하다" },
             
-            { text: "여행을 갈 때 상세한 계획을 세우기보다는 즉흥적으로 결정하는 것을 즐긴다.", type: "JP", direction: 1 },
-            { text: "마감 기한이 임박했을 때 오히려 집중력이 높아지고 효율이 오른다.", type: "JP", direction: 1 },
-            { text: "규칙이나 정해진 절차에 얽매이는 것을 답답하게 느낀다.", type: "JP", direction: 1 },
-            { text: "여러 가지 일을 동시에 시작하고, 상황에 따라 유연하게 계획을 변경한다.", type: "JP", direction: 1 },
-            { text: "결정을 내리기 전에 모든 가능성을 열어두는 것을 선호한다.", type: "JP", direction: 1 }
+            // JP: choiceA = J, choiceB = P
+            { type: "JP", choiceA: "여행을 떠나기 전, 모든 일정을 계획해 둔다", choiceB: "여행지에서 즉흥적으로 마음 가는 대로 움직인다" },
+            { type: "JP", choiceA: "일을 시작하기 전에 명확한 계획과 목표가 필요하다", choiceB: "상황에 맞춰 유연하게 일을 진행하는 것을 즐긴다" },
+            { type: "JP", choiceA: "정리정돈된 환경에서 안정감을 느낀다", choiceB: "자유롭고 개방적인 환경에서 영감을 얻는다" },
+            { type: "JP", choiceA: "결정을 빨리 내리고 다음 단계로 넘어가는 것을 선호한다", choiceB: "가능성을 열어두고 마지막 순간까지 정보를 수집한다" },
+            { type: "JP", choiceA: "마감 기한을 미리 지키기 위해 체계적으로 일한다", choiceB: "마감 기한이 임박했을 때 집중력이 가장 높아진다" }
         ];
         
         // Result Data
@@ -199,10 +202,10 @@
         };
 
         const typeMap = {
-            EI: { a: '외향(E)', b: '내향(I)' },
-            SN: { a: '직관(N)', b: '감각(S)' },
-            TF: { a: '감정(F)', b: '사고(T)' },
-            JP: { a: '인식(P)', b: '판단(J)' }
+            EI: { a: '내향', b: '외향' },
+            SN: { a: '감각', b: '직관' },
+            TF: { a: '사고', b: '감정' },
+            JP: { a: '판단', b: '인식' }
         };
 
         let currentQuestionIndex = 0;
@@ -222,21 +225,18 @@
             const progress = (currentQuestionIndex / questions.length) * 100;
             progressBar.style.width = `${progress}%`;
             questionNumberEl.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
-            questionTextEl.textContent = question.text;
+            questionTextEl.textContent = "두 가지 선택지 중 당신의 생각이나 행동에 더 가까운 쪽으로 슬라이더를 움직여주세요.";
 
-            const choices = typeMap[question.type];
-            // direction 1 means statement favors A, -1 means it favors B
-            choiceAEl.textContent = question.direction === 1 ? choices.a : choices.b;
-            choiceBEl.textContent = question.direction === 1 ? choices.b : choices.a;
+            choiceAEl.textContent = question.choiceA;
+            choiceBEl.textContent = question.choiceB;
             
             answerSlider.value = 0;
-            nextBtn.disabled = false; // 항상 다음 버튼 활성화
         }
 
         function handleNext() {
             const value = parseInt(answerSlider.value);
             const question = questions[currentQuestionIndex];
-            answers.push({ type: question.type, value: value * question.direction });
+            answers.push({ type: question.type, value: value });
             
             currentQuestionIndex++;
             if (currentQuestionIndex < questions.length) {
@@ -258,18 +258,20 @@
                 scores[answer.type] += answer.value;
             });
             
-            const EI_percent = Math.round(50 + (scores.EI / maxScorePerType) * 50);
-            const SN_percent = Math.round(50 + (scores.SN / maxScorePerType) * 50);
-            const TF_percent = Math.round(50 + (scores.TF / maxScorePerType) * 50);
-            const JP_percent = Math.round(50 + (scores.JP / maxScorePerType) * 50);
+            // Positive score = B choice (E, N, F, P)
+            // Negative score = A choice (I, S, T, J)
+            const e_percent = Math.round(50 + (scores.EI / maxScorePerType) * 50);
+            const n_percent = Math.round(50 + (scores.SN / maxScorePerType) * 50);
+            const f_percent = Math.round(50 + (scores.TF / maxScorePerType) * 50);
+            const p_percent = Math.round(50 + (scores.JP / maxScorePerType) * 50);
 
             const finalType = 
-                (EI_percent >= 50 ? 'E' : 'I') +
-                (SN_percent >= 50 ? 'N' : 'S') +
-                (TF_percent >= 50 ? 'F' : 'T') +
-                (JP_percent >= 50 ? 'P' : 'J');
+                (e_percent >= 50 ? 'E' : 'I') +
+                (n_percent >= 50 ? 'N' : 'S') +
+                (f_percent >= 50 ? 'F' : 'T') +
+                (p_percent >= 50 ? 'P' : 'J');
                 
-            showResult(finalType, [EI_percent, SN_percent, TF_percent, JP_percent]);
+            showResult(finalType, [e_percent, n_percent, f_percent, p_percent]);
         }
         
         function showResult(type, percentages) {
@@ -280,18 +282,17 @@
             mbtiStrengthsEl.innerText = resultData.strengths;
 
             const percentageData = [
-                { labels: typeMap.EI, percent: percentages[0] },
-                { labels: typeMap.SN, percent: percentages[1] },
-                { labels: typeMap.TF, percent: percentages[2] },
-                { labels: typeMap.JP, percent: percentages[3] }
+                { labels: typeMap.EI, percent_b: percentages[0] }, // 외향(E) %
+                { labels: typeMap.SN, percent_b: percentages[1] }, // 직관(N) %
+                { labels: typeMap.TF, percent_b: percentages[2] }, // 감정(F) %
+                { labels: typeMap.JP, percent_b: percentages[3] }  // 인식(P) %
             ];
 
-            const barContainer = document.querySelector('.result-bar-container').parentNode;
-            barContainer.innerHTML = ''; // Clear previous bars
+            resultBarsEl.innerHTML = ''; // Clear previous bars
 
             percentageData.forEach(data => {
-                const a_percent = data.percent;
-                const b_percent = 100 - a_percent;
+                const b_percent = data.percent_b; // B choice (오른쪽) %
+                const a_percent = 100 - b_percent;   // A choice (왼쪽) %
 
                 const barHTML = `
                     <div class="space-y-2">
@@ -305,7 +306,7 @@
                         </div>
                     </div>
                 `;
-                barContainer.innerHTML += barHTML;
+                resultBarsEl.innerHTML += barHTML;
             });
 
             questionScreen.classList.add('hidden');
@@ -320,3 +321,4 @@
     </script>
 </body>
 </html>
+
